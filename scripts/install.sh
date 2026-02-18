@@ -31,6 +31,7 @@ else
 fi
 
 echo "[3/3] Registering VM..."
+mkdir -p ~/.config/libvirt/qemu/lib
 virsh --connect qemu+unix:///session managedsave-remove WindowsOffice 2>/dev/null || true
 virsh --connect qemu+unix:///session destroy WindowsOffice 2>/dev/null || true
 virsh --connect qemu+unix:///session undefine WindowsOffice --nvram 2>/dev/null || true
