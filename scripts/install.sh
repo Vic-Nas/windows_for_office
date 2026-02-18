@@ -10,10 +10,8 @@ echo ""
 echo "  Lean Windows 11 Office VM - Installer"
 echo ""
 
-# Request sudo upfront (only needed for apt)
 sudo -v
 
-# Install dependencies if needed
 if ! command -v gnome-boxes &> /dev/null || ! command -v virsh &> /dev/null; then
     echo "[1/3] Installing GNOME Boxes and dependencies..."
     sudo apt update || true
@@ -22,10 +20,8 @@ else
     echo "[1/3] Dependencies already installed ✓"
 fi
 
-# Create images directory
 mkdir -p "$BOXES_DIR"
 
-# Download image if not already present
 if [ -f "$IMAGE_PATH" ]; then
     echo "[2/3] Image already exists at $IMAGE_PATH — skipping download ✓"
 else
@@ -33,20 +29,22 @@ else
     wget --progress=bar:force -O "$IMAGE_PATH" "$IMAGE_URL"
 fi
 
-# Register VM with libvirt
 echo "[3/3] Registering VM..."
-
-# Remove existing definition if present
 virsh --connect qemu+unix:///session managedsave-remove WindowsOffice 2>/dev/null || true
 virsh --connect qemu+unix:///session destroy WindowsOffice 2>/dev/null || true
 virsh --connect qemu+unix:///session undefine WindowsOffice --nvram 2>/dev/null || true
 virsh --connect qemu+unix:///session undefine WindowsOffice 2>/dev/null || true
 
-# Write VM definition
 VM_XML=$(mktemp /tmp/windows-office-XXXX.xml)
-cat > "$VM_XML" << XML
+
+python3 -c "
+import os
+image_path = os.path.expandvars(os.path.expanduser(os.environ.get('IMAGE_PATH', '$HOME/.local/share/gnome-boxes/images/office-windows.qcow2')))
+xml = open('/dev/stdin').read().replace('__IMAGE_PATH__', image_path)
+open(os.environ['VM_XML'], 'w').write(xml)
+" << 'XMLEOF'
 <domain type='kvm'>
-  <n>WindowsOffice</name>
+  <name>WindowsOffice</name>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
       <libosinfo:os id="http://microsoft.com/win/11"/>
@@ -87,7 +85,7 @@ cat > "$VM_XML" << XML
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
-      <source file='${IMAGE_PATH}'/>
+      <source file='__IMAGE_PATH__'/>
       <target dev='sda' bus='ide'/>
     </disk>
     <controller type='usb' index='0' model='qemu-xhci' ports='15'/>
@@ -126,7 +124,7 @@ cat > "$VM_XML" << XML
     <memballoon model='virtio'/>
   </devices>
 </domain>
-XML
+XMLEOF
 
 virsh --connect qemu+unix:///session define "$VM_XML"
 rm "$VM_XML"
