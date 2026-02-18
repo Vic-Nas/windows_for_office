@@ -2,7 +2,7 @@
 
 BOXES_DIR="$HOME/.local/share/gnome-boxes/images"
 IMAGE_PATH="$BOXES_DIR/office-windows.qcow2"
-DELETE_IMAGE="${1}"
+DELETE_IMAGE="${1:-0}"
 
 echo ""
 echo "  This will remove the VM, GNOME Boxes, and all configs."
@@ -27,17 +27,21 @@ sudo apt remove --purge gnome-boxes virtinst -y
 
 # Remove configs and caches
 echo "  Removing configs..."
+# Back up image to temp location before wiping directory
+if [ "$DELETE_IMAGE" != "1" ] && [ -f "$IMAGE_PATH" ]; then
+    TMP_IMAGE=$(mktemp /tmp/office-windows-XXXX.qcow2)
+    mv "$IMAGE_PATH" "$TMP_IMAGE"
+fi
+
 rm -rf ~/.local/share/gnome-boxes
 rm -rf ~/.config/gnome-boxes
 rm -rf ~/.config/libvirt
 rm -rf ~/.local/share/libvirt
 
-# Optionally delete image
-if [ "$DELETE_IMAGE" = "1" ]; then
-    if [ -f "$IMAGE_PATH" ]; then
-        echo "  Deleting image..."
-        rm "$IMAGE_PATH"
-    fi
+# Restore image if not deleting
+if [ "$DELETE_IMAGE" != "1" ] && [ -n "$TMP_IMAGE" ] && [ -f "$TMP_IMAGE" ]; then
+    mkdir -p "$(dirname "$IMAGE_PATH")"
+    mv "$TMP_IMAGE" "$IMAGE_PATH"
 fi
 
 echo ""
