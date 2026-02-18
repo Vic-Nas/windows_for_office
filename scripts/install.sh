@@ -16,7 +16,7 @@ sudo -v
 if ! command -v gnome-boxes &> /dev/null || ! command -v virsh &> /dev/null; then
     echo "[1/3] Installing GNOME Boxes and dependencies..."
     sudo apt update || true
-    sudo apt install -y gnome-boxes virtinst qemu-utils
+    sudo apt install -y gnome-boxes virtinst qemu-utils qemu-system-x86 libvirt-daemon libvirt-daemon-driver-qemu libvirt-clients ovmf
 else
     echo "[1/3] Dependencies already installed ✓"
 fi
