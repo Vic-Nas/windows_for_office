@@ -4,7 +4,7 @@ set -e
 BOXES_DIR="$HOME/.local/share/gnome-boxes/images"
 IMAGE_NAME="office-windows.qcow2"
 IMAGE_PATH="$BOXES_DIR/$IMAGE_NAME"
-IMAGE_URL="https://archive.org/download/windows11-office-lean/office-windows.qcow2"
+IMAGE_URL="https://archive.org/download/office-windows/office-windows.qcow2"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo ""
