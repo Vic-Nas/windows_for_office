@@ -1,85 +1,75 @@
 # Lean Windows 11 Office VM for GNOME Boxes
 
-A minimal Windows 11 installation (based on tiny11) optimized for office work only. Cleaned and compressed to ~24GB.
+A minimal Windows 11 installation optimized for office work. Ships at **~15GB** — the smallest it can get while keeping Windows + Office functional.
 
 ## What's Included
 - Windows 11 (tiny11 base)
-- Microsoft Office (Click-to-Run installation)
-- SPICE Guest Tools (for VM integration)
+- Microsoft Office (Click-to-Run)
+- SPICE Guest Tools (VM integration)
 
 ## What's Been Removed
-- Windows Store apps and UWP packages
-- Windows Mail/Calendar
-- Game DVR and Xbox components
+- Windows Store and UWP apps
+- Mail, Calendar, Xbox, Game DVR
 - Media Player
-- Windows Defender definition cache
-- Temporary files and update caches
-- Recovery partition
+- Defender definition cache
+- Temp files, update caches, recovery partition
 
-## Specifications
-- Virtual disk size: 27GB
-- Actual disk usage: ~24GB (compressed qcow2)
-- C:\ partition: 26GB (with ~10GB free for user data)
+## Specs
+- Virtual disk: 40GB (sparse — only real data takes space on your drive)
+- Actual disk usage: ~15GB
+- C:\ partition: ~17GB (2GB headroom above Windows + Office)
 
-## Installation
+## Install
 
-Run the install script:
 ```bash
-chmod +x install.sh
-./install.sh
+make install
 ```
 
-Or manually:
-```bash
-# Install GNOME Boxes
-sudo apt install gnome-boxes
+That's it. The image will be downloaded to `~/.local/share/gnome-boxes/images/` and registered with GNOME Boxes automatically. You'll be told where it lives in case you have other uses for it.
 
-# Download the image
-wget -O ~/.local/share/gnome-boxes/images/office-windows.qcow2 \
-  https://archive.org/download/windows11-office-lean/office-windows.qcow2
+Then launch GNOME Boxes — the VM will appear ready to start.
 
-# Create symlink for GNOME Boxes
-ln -s office-windows.qcow2 \
-  ~/.local/share/gnome-boxes/images/boxes-unknown-2
-
-# Launch GNOME Boxes
-gnome-boxes
-```
-
-## First Boot
-- Default user: Flash
-- Office is pre-installed and ready to use
-- Recommended: Activate Windows and Office with your licenses
-
-## Expanding Storage
-If you need more space in the future:
-
-1. Boot the VM
-2. Open PowerShell as Administrator:
-```powershell
-# Check maximum available space
-Get-PartitionSupportedSize -DriveLetter C
-
-# Expand to maximum (example: 50GB)
-Resize-Partition -DriveLetter C -Size 50GB
-```
-
-3. Shut down the VM
-4. Expand the qcow2 virtual disk from Linux:
-```bash
-qemu-img resize ~/.local/share/gnome-boxes/images/office-windows.qcow2 +23G
-```
+**Default user:** Flash  
+**First thing to do:** Activate Windows and Office with your licenses.
 
 ## Maintenance
-To keep the image lean:
-- Regularly clear `C:\Windows\Temp`
-- Run Disk Cleanup occasionally
-- Avoid installing unnecessary software
+
+After Windows updates or running Disk Cleanup inside the VM, recompress to reclaim space:
+
+```bash
+make compress
+```
+
+Remove backups and temp files:
+
+```bash
+make clean
+```
+
+Before anything risky, back up the image:
+
+```bash
+make backup
+```
+
+## Need More Space?
+
+The virtual disk is already set to 40GB, but C:\ only uses ~17GB of it. To expand whenever you need room, open PowerShell inside Windows as Administrator:
+
+```powershell
+# See how much you can expand
+Get-PartitionSupportedSize -DriveLetter C
+
+# Expand (example: to 35GB)
+Resize-Partition -DriveLetter C -Size 35GB
+```
+
+No changes needed outside the VM — the sparse qcow2 will grow on demand.
 
 ## Technical Details
 - Base: tiny11 (minimal Windows 11)
 - Format: qcow2 with zlib compression
-- Boot: BIOS/MBR (not UEFI)
+- Boot: BIOS/MBR
 - Filesystem: NTFS
 
 ---
