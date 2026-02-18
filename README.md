@@ -1,76 +1,50 @@
 # Lean Windows 11 Office VM for GNOME Boxes
 
-A minimal Windows 11 installation optimized for office work. Ships at **~15GB** — the smallest it can get while keeping Windows + Office functional.
+Minimal Windows 11 + Microsoft Office, optimized for GNOME Boxes. **~15GB** on disk.
 
-## What's Included
-- Windows 11 (tiny11 base)
-- Microsoft Office (Click-to-Run)
-- SPICE Guest Tools (VM integration)
-
-## What's Been Removed
-- Windows Store and UWP apps
-- Mail, Calendar, Xbox, Game DVR
-- Media Player
-- Defender definition cache
-- Temp files, update caches, recovery partition
-
-## Specs
-- Virtual disk: 40GB (sparse — only real data takes space on your drive)
-- Actual disk usage: ~15GB
-- C:\ partition: ~17GB (2GB headroom above Windows + Office)
-
-## Install
+## Quickstart
 
 ```bash
 make install
 ```
 
-That's it. The image will be downloaded to `~/.local/share/gnome-boxes/images/` and registered with GNOME Boxes automatically. You'll be told where it lives in case you have other uses for it.
+Then open GNOME Boxes. The VM will appear ready to start.
 
-Then launch GNOME Boxes — the VM will appear ready to start.
+**First boot:** You may see a blue Recovery screen — this is normal. Press **Enter** to continue. Windows is just adjusting to the new VM environment.
 
 **Default user:** Flash  
 **First thing to do:** Activate Windows and Office with your licenses.
 
 ## Maintenance
 
-After Windows updates or running Disk Cleanup inside the VM, recompress to reclaim space:
-
 ```bash
-make compress
-```
-
-Remove backups and temp files:
-
-```bash
-make clean
-```
-
-Before anything risky, back up the image:
-
-```bash
-make backup
+make compress    # Reclaim space after Windows updates or cleanup
+make backup      # Backup the image before risky operations
+make clean       # Remove backups and temp files
+make uninstall   # Remove VM, GNOME Boxes and configs (keeps image)
+make uninstall IMAGE=1  # Also delete the image
 ```
 
 ## Need More Space?
 
-The virtual disk is already set to 40GB, but C:\ only uses ~17GB of it. To expand whenever you need room, open PowerShell inside Windows as Administrator:
+The image ships with ~2GB free on C:\. To expand, open PowerShell as Administrator inside Windows:
 
 ```powershell
-# See how much you can expand
-Get-PartitionSupportedSize -DriveLetter C
-
-# Expand (example: to 35GB)
-Resize-Partition -DriveLetter C -Size 35GB
+Get-PartitionSupportedSize -DriveLetter C   # check available space
+Resize-Partition -DriveLetter C -Size 25GB  # expand to desired size
 ```
 
-No changes needed outside the VM — the sparse qcow2 will grow on demand.
+## What's Included
+- Windows 11 (tiny11 base)
+- Microsoft Office (Click-to-Run)
+- SPICE Guest Tools
 
 ## Technical Details
-- Base: tiny11 (minimal Windows 11)
 - Format: qcow2 with zlib compression
-- Boot: BIOS/MBR
-- Filesystem: NTFS
+- Boot: BIOS/MBR (not UEFI)
+- Machine type: pc-i440fx
+
+See [STEPS.md](STEPS.md) for the full process used to build this image.
 
 ---
 Created: February 2026
