@@ -47,7 +47,7 @@ gnome-boxes
 ```
 
 ## First Boot
-- Default user: Flash (or whatever was configured in tiny11)
+- Default user: Flash
 - Office is pre-installed and ready to use
 - Recommended: Activate Windows and Office with your licenses
 
