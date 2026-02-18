@@ -4,7 +4,7 @@ set -e
 BOXES_DIR="$HOME/.local/share/gnome-boxes/images"
 IMAGE_NAME="office-windows.qcow2"
 IMAGE_PATH="$BOXES_DIR/$IMAGE_NAME"
-IMAGE_URL="https://archive.org/download/office-windows/office-windows.qcow2"
+IMAGE_URL="https://archive.org/download/windows11-office-lean/office-windows.qcow2"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo ""
@@ -31,6 +31,14 @@ else
 fi
 
 echo "[3/3] Registering VM..."
+mkdir -p ~/.config/libvirt/qemu/lib
+
+# Set up storage pool for GNOME Boxes
+virsh --connect qemu+unix:///session pool-destroy gnome-boxes 2>/dev/null || true
+virsh --connect qemu+unix:///session pool-undefine gnome-boxes 2>/dev/null || true
+virsh --connect qemu+unix:///session pool-define-as gnome-boxes dir --target "$BOXES_DIR"
+virsh --connect qemu+unix:///session pool-start gnome-boxes
+virsh --connect qemu+unix:///session pool-autostart gnome-boxes
 mkdir -p ~/.config/libvirt/qemu/lib
 virsh --connect qemu+unix:///session managedsave-remove WindowsOffice 2>/dev/null || true
 virsh --connect qemu+unix:///session destroy WindowsOffice 2>/dev/null || true

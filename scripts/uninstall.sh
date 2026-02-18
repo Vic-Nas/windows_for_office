@@ -14,6 +14,10 @@ read -p "  Continue? (y/N): " -n 1 -r
 echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && echo "  Aborted." && exit 0
 
+# Remove storage pool
+virsh --connect qemu+unix:///session pool-destroy gnome-boxes 2>/dev/null || true
+virsh --connect qemu+unix:///session pool-undefine gnome-boxes 2>/dev/null || true
+
 # Remove VM definition
 echo "  Removing VM..."
 virsh --connect qemu+unix:///session managedsave-remove WindowsOffice 2>/dev/null || true
